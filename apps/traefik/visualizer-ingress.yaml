@@ -1,0 +1,14 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: visualizer
+  namespace: data-platform
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`visualizer.cloud-lab.local`)
+      kind: Rule
+      services:
+        - name: visualizer
+          port: 5000
