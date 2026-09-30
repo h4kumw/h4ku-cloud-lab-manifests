@@ -1,0 +1,117 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pg-init-schema
+  namespace: infra
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: psql
+          image: postgres:16-alpine
+          env:
+            - name: PGHOST
+              value: postgres.infra.svc.cluster.local
+            - name: PGPORT
+              value: "5432"
+            - name: PGUSER
+              value: admin
+            - name: PGPASSWORD
+              value: postgres
+            - name: PGDATABASE
+              value: farcana
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "── PG init: creating tables if not exist ──"
+              psql <<'SQL'
+              -- matches
+              CREATE TABLE IF NOT EXISTS matches (
+                  match_id   UUID PRIMARY KEY,
+                  created_at TIMESTAMP DEFAULT now(),
+                  status     VARCHAR(20) DEFAULT 'pending',
+                  region     VARCHAR(10)
+              );
+
+              -- players
+              CREATE TABLE IF NOT EXISTS players (
+                  player_id   UUID PRIMARY KEY,
+                  nickname    VARCHAR(100),
+                  skill_level INTEGER,
+                  lat         DOUBLE PRECISION,
+                  lon         DOUBLE PRECISION,
+                  created_at  TIMESTAMP DEFAULT now()
+              );
+
+              -- match_players
+              CREATE TABLE IF NOT EXISTS match_players (
+                  match_id  UUID NOT NULL,
+                  player_id UUID NOT NULL,
+                  joined_at TIMESTAMP DEFAULT now(),
+                  PRIMARY KEY (match_id, player_id)
+              );
+
+              -- match_telemetry
+              CREATE TABLE IF NOT EXISTS match_telemetry (
+                  id           BIGSERIAL PRIMARY KEY,
+                  match_id     UUID NOT NULL,
+                  player_id    UUID NOT NULL,
+                  event_type   VARCHAR(50) NOT NULL,
+                  lat          DOUBLE PRECISION,
+                  lon          DOUBLE PRECISION,
+                  ping         INTEGER DEFAULT 0,
+                  server_id    VARCHAR(50),
+                  event_time   TIMESTAMP NOT NULL DEFAULT now(),
+                  synced_to_ch BOOLEAN NOT NULL DEFAULT FALSE
+              );
+              CREATE INDEX IF NOT EXISTS idx_match_telemetry_event_time ON match_telemetry(event_time);
+              CREATE INDEX IF NOT EXISTS idx_match_telemetry_match_id ON match_telemetry(match_id);
+              CREATE INDEX IF NOT EXISTS idx_match_telemetry_synced ON match_telemetry(synced_to_ch) WHERE synced_to_ch = FALSE;
+
+              -- nft_transactions
+              CREATE TABLE IF NOT EXISTS nft_transactions (
+                  tx_hash      VARCHAR(66) PRIMARY KEY,
+                  nft_id       VARCHAR(50),
+                  from_address VARCHAR(42),
+                  to_address   VARCHAR(42),
+                  price        NUMERIC(18,2),
+                  timestamp    TIMESTAMP DEFAULT now(),
+                  synced_to_ch BOOLEAN NOT NULL DEFAULT FALSE
+              );
+              ALTER TABLE nft_transactions ADD COLUMN IF NOT EXISTS synced_to_ch BOOLEAN NOT NULL DEFAULT FALSE;
+              CREATE INDEX IF NOT EXISTS idx_nft_transactions_synced ON nft_transactions(synced_to_ch) WHERE synced_to_ch = FALSE;
+
+              -- bank_statements
+              CREATE TABLE IF NOT EXISTS bank_statements (
+                  id             SERIAL PRIMARY KEY,
+                  statement_date DATE,
+                  bank_code      VARCHAR(10),
+                  total_amount   NUMERIC(18,2),
+                  processed_at   TIMESTAMP DEFAULT now(),
+                  synced_to_ch   BOOLEAN NOT NULL DEFAULT FALSE
+              );
+              ALTER TABLE bank_statements ADD COLUMN IF NOT EXISTS synced_to_ch BOOLEAN NOT NULL DEFAULT FALSE;
+              CREATE INDEX IF NOT EXISTS idx_bank_statements_synced ON bank_statements(synced_to_ch) WHERE synced_to_ch = FALSE;
+
+              -- cps_sensors
+              CREATE TABLE IF NOT EXISTS cps_sensors (
+                  id          BIGSERIAL PRIMARY KEY,
+                  device_id   VARCHAR(100) NOT NULL,
+                  sensor_type VARCHAR(50) NOT NULL,
+                  value       DOUBLE PRECISION NOT NULL,
+                  unit        VARCHAR(20),
+                  location    VARCHAR(100),
+                  created_at  TIMESTAMP NOT NULL DEFAULT now()
+              );
+              CREATE INDEX IF NOT EXISTS idx_cps_sensors_device_id ON cps_sensors(device_id);
+              CREATE INDEX IF NOT EXISTS idx_cps_sensors_created_at ON cps_sensors(created_at);
+SQL
+              echo "✅ PG init done"

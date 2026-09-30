@@ -1,0 +1,15 @@
+# Патч для копирования DAG'ов из ConfigMap в PVC
+scheduler:
+  extraInitContainers:
+    - name: copy-dags
+      image: busybox:latest
+      command: ["sh", "-c", "cp -v /configmap-dags/*.py /opt/airflow/dags/ 2>/dev/null || true"]
+      volumeMounts:
+        - name: dags-cm-vol
+          mountPath: /configmap-dags
+        - name: dags-pvc
+          mountPath: /opt/airflow/dags
+  extraVolumes:
+    - name: dags-cm-vol
+      configMap:
+        name: airflow-dags-cm
