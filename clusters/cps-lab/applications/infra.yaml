@@ -11,6 +11,8 @@ spec:
     repoURL: https://github.com/h4kumw/h4ku-cloud-lab-manifests.git
     targetRevision: main
     path: apps/infra
+    directory:
+      recurse: true    # ← ВАЖНО: рекурсивно обходить подпапки
   destination:
     server: https://kubernetes.default.svc
     namespace: infra
