@@ -42,8 +42,8 @@ spec:
               echo "ClickHouse is ready!"
       containers:
         - name: simulator
-          image: cloud-lab/simulator:latest
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/h4kumw/cloud-lab-simulators:farcana_director-latest
+          imagePullPolicy: Always
           command: ["python3", "-u", "farcana_director.py"]
           env:
             - name: PG_HOST

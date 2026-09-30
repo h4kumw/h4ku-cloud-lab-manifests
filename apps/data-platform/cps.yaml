@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
       - name: simulator
-        image: cloud-lab/simulator:latest
-        imagePullPolicy: IfNotPresent
+        image: ghcr.io/h4kumw/cloud-lab-simulators:cps_sensor_simulator-latest
+        imagePullPolicy: Always
         command:
         - python3
         - -u
