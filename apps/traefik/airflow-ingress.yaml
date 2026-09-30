@@ -12,3 +12,4 @@ spec:
       services:
         - name: airflow-api-server
           port: 8080
+# GitOps demo Wed Sep 30 03:03:02 +03 2026
