@@ -1,0 +1,57 @@
+name: Build Simulators
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/data-platform/*.py'
+      - 'apps/data-platform/Dockerfile'
+      - 'apps/data-platform/requirements.txt'
+      - '.github/workflows/build-simulators.yml'
+  workflow_dispatch:  # ручной запуск
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/cloud-lab-simulators
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        simulator: [farcana_director, chimeras_simulator, kyriba_finance, cps_sensor_simulator]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: apps/data-platform
+          file: apps/data-platform/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}:${{ matrix.simulator }}-latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}:${{ matrix.simulator }}-${{ github.sha }}
+          build-args: |
+            SIMULATOR=${{ matrix.simulator }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Summary
+        run: |
+          echo "### ✅ Built ${{ matrix.simulator }}" >> $GITHUB_STEP_SUMMARY
+          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}:${{ matrix.simulator }}-latest" >> $GITHUB_STEP_SUMMARY
