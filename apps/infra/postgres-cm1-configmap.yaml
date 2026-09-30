@@ -1,0 +1,49 @@
+apiVersion: v1
+data:
+  01_schema.sql: |
+    -- Farcana Game Schema (OLTP)
+    CREATE TABLE IF NOT EXISTS matches (
+        match_id UUID PRIMARY KEY,
+        created_at TIMESTAMP DEFAULT NOW(),
+        status VARCHAR(20) DEFAULT 'pending',
+        region VARCHAR(10)
+    );
+
+    CREATE TABLE IF NOT EXISTS players (
+        player_id UUID PRIMARY KEY,
+        nickname VARCHAR(50),
+        skill_level INT,
+        created_at TIMESTAMP DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS match_players (
+        match_id UUID REFERENCES matches(match_id),
+        player_id UUID REFERENCES players(player_id),
+        joined_at TIMESTAMP DEFAULT NOW(),
+        PRIMARY KEY (match_id, player_id)
+    );
+
+    -- Chimeras Web3 Schema
+    CREATE TABLE IF NOT EXISTS nft_transactions (
+        tx_hash VARCHAR(66) PRIMARY KEY,
+        nft_id VARCHAR(50),
+        from_address VARCHAR(42),
+        to_address VARCHAR(42),
+        price DECIMAL(18,2),
+        timestamp TIMESTAMP DEFAULT NOW()
+    );
+
+    -- Kyriba Finance Schema
+    CREATE TABLE IF NOT EXISTS bank_statements (
+        id SERIAL PRIMARY KEY,
+        statement_date DATE,
+        bank_code VARCHAR(10),
+        total_amount DECIMAL(18,2),
+        processed_at TIMESTAMP DEFAULT NOW()
+    );
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: postgres
+  name: postgres-cm1
+  namespace: infra

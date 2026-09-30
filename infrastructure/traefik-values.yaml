@@ -1,0 +1,37 @@
+# Traefik v3 для K3d (схема v41)
+deployment:
+  replicas: 1
+
+service:
+  type: LoadBalancer
+
+providers:
+  kubernetesCRD:
+    enabled: true
+  kubernetesIngress:
+    enabled: true
+
+# v41: log вместо logs.general, accessLog вместо logs.access
+log:
+  level: INFO
+
+accessLog:
+  enabled: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+nodeSelector:
+  kubernetes.io/hostname: k3d-cps-lab-agent-0
+
+ingressRoute:
+  dashboard:
+    enabled: true
+    matchRule: Host(`traefik.cloud-lab.local`)
+    entryPoints:
+      - web

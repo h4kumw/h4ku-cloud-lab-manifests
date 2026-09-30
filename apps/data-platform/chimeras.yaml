@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chimeras-simulator
+  namespace: data-platform
+  labels:
+    app: chimeras-simulator
+    case: web3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chimeras-simulator
+  template:
+    metadata:
+      labels:
+        app: chimeras-simulator
+        case: web3
+    spec:
+      containers:
+      - name: simulator
+        image: cloud-lab/simulator:latest
+        imagePullPolicy: IfNotPresent
+        command:
+        - python3
+        - -u
+        - chimeras_simulator.py
+        env:
+        - name: CH_HOST
+          value: clickhouse.infra.svc.cluster.local
+        - name: CH_PORT
+          value: '8123'
+        - name: CH_USER
+          value: admin
+        - name: CH_PASSWORD
+          value: admin
+        - name: PG_HOST
+          value: postgres.infra.svc.cluster.local
+        - name: PG_PORT
+          value: '5432'
+        - name: PG_USER
+          value: admin
+        - name: PG_PASSWORD
+          value: postgres
+        - name: PG_DB
+          value: farcana
+        resources:
+          requests:
+            memory: 128Mi
+            cpu: 100m
+          limits:
+            memory: 512Mi
+            cpu: 500m

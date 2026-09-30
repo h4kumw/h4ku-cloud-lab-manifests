@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cps-simulator
+  namespace: cps
+  labels:
+    app: cps-simulator
+    case: cps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cps-simulator
+  template:
+    metadata:
+      labels:
+        app: cps-simulator
+        case: cps
+    spec:
+      containers:
+      - name: simulator
+        image: cloud-lab/simulator:latest
+        imagePullPolicy: IfNotPresent
+        command:
+        - python3
+        - -u
+        - cps_sensor_simulator.py
+        env:
+        - name: MQTT_HOST
+          value: mosquitto.infra.svc.cluster.local
+        - name: MQTT_PORT
+          value: '1883'
+        - name: INFLUX_URL
+          value: http://influxdb.infra.svc.cluster.local:8086/api/v2/write
+        - name: INFLUX_TOKEN
+          value: admin123
+        - name: INFLUX_ORG
+          value: cps
+        - name: INFLUX_BUCKET
+          value: cps_telemetry
+        - name: CH_HOST
+          value: clickhouse.infra.svc.cluster.local
+        - name: CH_PORT
+          value: '8123'
+        - name: CH_USER
+          value: admin
+        - name: CH_PASSWORD
+          value: admin
+        - name: PG_HOST
+          value: postgres.infra.svc.cluster.local
+        - name: PG_PORT
+          value: '5432'
+        - name: PG_USER
+          value: admin
+        - name: PG_PASSWORD
+          value: postgres
+        - name: PG_DB
+          value: farcana
+        - name: KAFKA_BOOTSTRAP
+          value: kafka-svc.infra.svc.cluster.local:9092
+        - name: KAFKA_TOPIC
+          value: cps-sensors
+        resources:
+          requests:
+            memory: 128Mi
+            cpu: 100m
+          limits:
+            memory: 512Mi
+            cpu: 500m

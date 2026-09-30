@@ -1,0 +1,14 @@
+apiVersion: v1
+data:
+  mosquitto.conf: |
+    listener 1883
+    allow_anonymous true
+    persistence true
+    persistence_location /mosquitto/data/
+    log_dest file /mosquitto/log/mosquitto.log
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: mosquitto
+  name: mosquitto-cm0
+  namespace: infra

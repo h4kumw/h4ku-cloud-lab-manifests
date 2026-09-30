@@ -1,0 +1,77 @@
+apiVersion: v1
+data:
+  01_telemetry.sql: |
+    -- Game Analytics Database
+    CREATE DATABASE IF NOT EXISTS game_analytics;
+
+    -- Farcana Match Telemetry
+    CREATE TABLE IF NOT EXISTS game_analytics.match_telemetry (
+        event_time DateTime,
+        match_id String,
+        player_id String,
+        event_type String,
+        lat Float64,
+        lon Float64,
+        ping UInt16 DEFAULT 0,
+        server_id String DEFAULT ''
+    ) ENGINE = MergeTree()
+    PARTITION BY toYYYYMMDD(event_time)
+    ORDER BY (match_id, event_time)
+    TTL event_time + INTERVAL 90 DAY;
+
+    -- Chimeras NFT Analytics
+    CREATE TABLE IF NOT EXISTS game_analytics.nft_transactions (
+        timestamp DateTime,
+        tx_hash String,
+        nft_id String,
+        from_address String,
+        to_address String,
+        price Float64
+    ) ENGINE = MergeTree()
+    PARTITION BY toYYYYMMDD(timestamp)
+    ORDER BY (tx_hash, timestamp)
+    TTL timestamp + INTERVAL 365 DAY;
+
+    -- CPS Sensor Telemetry
+    CREATE TABLE IF NOT EXISTS game_analytics.sensor_data (
+        timestamp DateTime,
+        device_id String,
+        sensor_type String,
+        value Float64,
+        unit String,
+        location String
+    ) ENGINE = MergeTree()
+    PARTITION BY toYYYYMMDD(timestamp)
+    ORDER BY (device_id, timestamp)
+    TTL timestamp + INTERVAL 30 DAY;
+
+    -- CPS Aggregated Data (Edge)
+    CREATE TABLE IF NOT EXISTS game_analytics.sensor_aggregates (
+        window_time DateTime,
+        device_id String,
+        sensor_type String,
+        avg_value Float64,
+        min_value Float64,
+        max_value Float64,
+        sample_count UInt32
+    ) ENGINE = MergeTree()
+    PARTITION BY toYYYYMMDD(window_time)
+    ORDER BY (device_id, window_time)
+    TTL window_time + INTERVAL 90 DAY;
+
+    -- Kyriba Financial Analytics
+    CREATE TABLE IF NOT EXISTS game_analytics.financial_reports (
+        report_date Date,
+        bank_code String,
+        total_transactions UInt32,
+        total_volume Float64,
+        avg_transaction Float64
+    ) ENGINE = MergeTree()
+    PARTITION BY toYYYYMMDD(report_date)
+    ORDER BY (bank_code, report_date);
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: clickhouse
+  name: clickhouse-cm1
+  namespace: infra

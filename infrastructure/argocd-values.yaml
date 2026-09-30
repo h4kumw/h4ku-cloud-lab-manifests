@@ -1,0 +1,56 @@
+global:
+  domain: argocd.cloud-lab.local
+
+server:
+  replicas: 1
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: false
+  resources:
+    requests: {cpu: 50m, memory: 128Mi}
+    limits:   {cpu: 200m, memory: 256Mi}
+  nodeSelector:
+    kubernetes.io/hostname: k3d-cps-lab-agent-0
+
+controller:
+  replicas: 1
+  resources:
+    requests: {cpu: 100m, memory: 256Mi}
+    limits:   {cpu: 500m, memory: 512Mi}
+  nodeSelector:
+    kubernetes.io/hostname: k3d-cps-lab-agent-0
+
+repoServer:
+  replicas: 1
+  resources:
+    requests: {cpu: 50m, memory: 128Mi}
+    limits:   {cpu: 300m, memory: 256Mi}
+  nodeSelector:
+    kubernetes.io/hostname: k3d-cps-lab-agent-0
+
+redis:
+  resources:
+    requests: {cpu: 50m, memory: 64Mi}
+    limits:   {cpu: 200m, memory: 128Mi}
+  nodeSelector:
+    kubernetes.io/hostname: k3d-cps-lab-agent-0
+
+applicationSet:
+  replicas: 1
+  resources:
+    requests: {cpu: 50m, memory: 64Mi}
+    limits:   {cpu: 200m, memory: 128Mi}
+
+notifications:
+  enabled: false
+
+dex:
+  enabled: false
+
+configs:
+  params:
+    server.insecure: "true"
+  cm:
+    timeout.reconciliation: 180s
+    timeout.reconciliation.jitter: 60s
