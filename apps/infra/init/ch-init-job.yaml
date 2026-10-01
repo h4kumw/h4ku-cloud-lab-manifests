@@ -3,9 +3,6 @@ kind: Job
 metadata:
   name: ch-init-schema
   namespace: infra
-  annotations:
-    argocd.argoproj.io/hook: PostSync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   backoffLimit: 3
   ttlSecondsAfterFinished: 600
@@ -20,90 +17,15 @@ spec:
             - -c
             - |
               set -e
-              echo "── CH init: creating database + tables ──"
-              clickhouse-client \
-                --host clickhouse.infra.svc.cluster.local \
-                --user admin \
-                --password admin \
-                --multiquery <<'SQL'
-
-              -- DB
+              echo "── CH init ──"
+              clickhouse-client --host clickhouse.infra.svc.cluster.local --user admin --password admin --multiquery <<'SQL'
               CREATE DATABASE IF NOT EXISTS game_analytics;
-
-              -- match_telemetry
-              CREATE TABLE IF NOT EXISTS game_analytics.match_telemetry (
-                  event_time DateTime,
-                  match_id String,
-                  player_id String,
-                  event_type String,
-                  lat Float64,
-                  lon Float64,
-                  ping Int32,
-                  server_id String
-              ) ENGINE = MergeTree()
-              ORDER BY (event_time, match_id);
-
-              -- nft_transactions
-              CREATE TABLE IF NOT EXISTS game_analytics.nft_transactions (
-                  timestamp DateTime,
-                  tx_hash String,
-                  nft_id String,
-                  from_address String,
-                  to_address String,
-                  price Float64
-              ) ENGINE = MergeTree()
-              ORDER BY (timestamp, tx_hash);
-
-              -- financial_reports
-              CREATE TABLE IF NOT EXISTS game_analytics.financial_reports (
-                  statement_date Date,
-                  bank_code String,
-                  total_amount Float64,
-                  processed_at DateTime
-              ) ENGINE = MergeTree()
-              ORDER BY (statement_date, bank_code);
-
-              -- sensor_data
-              CREATE TABLE IF NOT EXISTS game_analytics.sensor_data (
-                  timestamp DateTime,
-                  device_id String,
-                  sensor_type String,
-                  value Float64,
-                  unit String,
-                  location String
-              ) ENGINE = MergeTree()
-              ORDER BY (timestamp, device_id);
-
-              -- sensor_aggregates
-              CREATE TABLE IF NOT EXISTS game_analytics.sensor_aggregates (
-                  window_start DateTime,
-                  device_id String,
-                  sensor_type String,
-                  avg_value Float64,
-                  max_value Float64,
-                  min_value Float64,
-                  count UInt32
-              ) ENGINE = MergeTree()
-              ORDER BY (window_start, device_id, sensor_type);
-
-              -- Kafka Engine: sensor_data_queue
-              CREATE TABLE IF NOT EXISTS game_analytics.sensor_data_queue (
-                  timestamp DateTime,
-                  device_id String,
-                  sensor_type String,
-                  value Float64,
-                  unit String,
-                  location String
-              ) ENGINE = Kafka()
-              SETTINGS
-                  kafka_broker_list = 'kafka-svc.infra.svc.cluster.local:9092',
-                  kafka_topic_list = 'cps-sensors',
-                  kafka_group_name = 'ch_sensor_consumer',
-                  kafka_format = 'JSONEachRow';
-
-              -- MV: Kafka → sensor_data
-              CREATE MATERIALIZED VIEW IF NOT EXISTS game_analytics.sensor_data_mv
-              TO game_analytics.sensor_data AS
-              SELECT * FROM game_analytics.sensor_data_queue;
+              CREATE TABLE IF NOT EXISTS game_analytics.match_telemetry (event_time DateTime, match_id String, player_id String, event_type String, lat Float64, lon Float64, ping Int32, server_id String) ENGINE = MergeTree() ORDER BY (event_time, match_id);
+              CREATE TABLE IF NOT EXISTS game_analytics.nft_transactions (timestamp DateTime, tx_hash String, nft_id String, from_address String, to_address String, price Float64) ENGINE = MergeTree() ORDER BY (timestamp, tx_hash);
+              CREATE TABLE IF NOT EXISTS game_analytics.financial_reports (statement_date Date, bank_code String, total_amount Float64, processed_at DateTime) ENGINE = MergeTree() ORDER BY (statement_date, bank_code);
+              CREATE TABLE IF NOT EXISTS game_analytics.sensor_data (timestamp DateTime, device_id String, sensor_type String, value Float64, unit String, location String) ENGINE = MergeTree() ORDER BY (timestamp, device_id);
+              CREATE TABLE IF NOT EXISTS game_analytics.sensor_aggregates (window_start DateTime, device_id String, sensor_type String, avg_value Float64, max_value Float64, min_value Float64, count UInt32) ENGINE = MergeTree() ORDER BY (window_start, device_id, sensor_type);
+              CREATE TABLE IF NOT EXISTS game_analytics.sensor_data_queue (timestamp DateTime, device_id String, sensor_type String, value Float64, unit String, location String) ENGINE = Kafka() SETTINGS kafka_broker_list = 'kafka-svc.infra.svc.cluster.local:9092', kafka_topic_list = 'cps-sensors', kafka_group_name = 'ch_sensor_consumer', kafka_format = 'JSONEachRow';
+              CREATE MATERIALIZED VIEW IF NOT EXISTS game_analytics.sensor_data_mv TO game_analytics.sensor_data AS SELECT * FROM game_analytics.sensor_data_queue;
 SQL
               echo "✅ CH init done"
