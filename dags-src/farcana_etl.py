@@ -99,7 +99,7 @@ with DAG(
         'retries': 2,
         'retry_delay': timedelta(minutes=1),
     },
-    schedule='*/5 * * * *',
+    schedule='*/1 * * * *',
     catchup=False,
     max_active_runs=1,
     max_active_tasks=1,
