@@ -10,20 +10,20 @@ spec:
     spec:
       restartPolicy: OnFailure
       containers:
-        - name: clickhouse-init
-          image: clickhouse/clickhouse-server:latest
+        - name: ch-init
+          image: curlimages/curl:latest
           command: ["/bin/sh", "-c"]
           args:
             - |
               set -e
-              echo "── CH init ──"
-              CH="clickhouse-client --host clickhouse.infra.svc.cluster.local --port 8123 --protocol http --user admin --password admin"
+              echo "── CH init via HTTP ──"
+              CH="http://clickhouse.infra.svc.cluster.local:8123/?user=admin&password=admin"
               
-              $CH --query "CREATE DATABASE IF NOT EXISTS game_analytics"
-              $CH --query "CREATE TABLE IF NOT EXISTS game_analytics.match_telemetry (event_time DateTime, match_id String, player_id String, event_type String, lat Float64, lon Float64, ping Int32, server_id String) ENGINE = MergeTree() ORDER BY (event_time, match_id)"
-              $CH --query "CREATE TABLE IF NOT EXISTS game_analytics.nft_transactions (timestamp DateTime, tx_hash String, nft_id String, from_address String, to_address String, price Float64) ENGINE = MergeTree() ORDER BY (timestamp, tx_hash)"
-              $CH --query "CREATE TABLE IF NOT EXISTS game_analytics.financial_reports (statement_date Date, bank_code String, total_amount Float64, processed_at DateTime) ENGINE = MergeTree() ORDER BY (statement_date, bank_code)"
-              $CH --query "CREATE TABLE IF NOT EXISTS game_analytics.sensor_data (timestamp DateTime, device_id String, sensor_type String, value Float64, unit String, location String) ENGINE = MergeTree() ORDER BY (timestamp, device_id)"
-              $CH --query "CREATE TABLE IF NOT EXISTS game_analytics.sensor_data_queue (timestamp DateTime, device_id String, sensor_type String, value Float64, unit String, location String) ENGINE = Kafka() SETTINGS kafka_broker_list='kafka-svc.infra.svc.cluster.local:9092', kafka_topic_list='cps-sensors', kafka_group_name='ch_sensor_consumer', kafka_format='JSONEachRow'"
-              $CH --query "CREATE MATERIALIZED VIEW IF NOT EXISTS game_analytics.sensor_data_mv TO game_analytics.sensor_data AS SELECT * FROM game_analytics.sensor_data_queue"
+              curl -sf "$CH" --data-binary "CREATE DATABASE IF NOT EXISTS game_analytics"
+              curl -sf "$CH" --data-binary "CREATE TABLE IF NOT EXISTS game_analytics.match_telemetry (event_time DateTime, match_id String, player_id String, event_type String, lat Float64, lon Float64, ping Int32, server_id String) ENGINE = MergeTree() ORDER BY (event_time, match_id)"
+              curl -sf "$CH" --data-binary "CREATE TABLE IF NOT EXISTS game_analytics.nft_transactions (timestamp DateTime, tx_hash String, nft_id String, from_address String, to_address String, price Float64) ENGINE = MergeTree() ORDER BY (timestamp, tx_hash)"
+              curl -sf "$CH" --data-binary "CREATE TABLE IF NOT EXISTS game_analytics.financial_reports (statement_date Date, bank_code String, total_amount Float64, processed_at DateTime) ENGINE = MergeTree() ORDER BY (statement_date, bank_code)"
+              curl -sf "$CH" --data-binary "CREATE TABLE IF NOT EXISTS game_analytics.sensor_data (timestamp DateTime, device_id String, sensor_type String, value Float64, unit String, location String) ENGINE = MergeTree() ORDER BY (timestamp, device_id)"
+              curl -sf "$CH" --data-binary "CREATE TABLE IF NOT EXISTS game_analytics.sensor_data_queue (timestamp DateTime, device_id String, sensor_type String, value Float64, unit String, location String) ENGINE = Kafka() SETTINGS kafka_broker_list='kafka-svc.infra.svc.cluster.local:9092', kafka_topic_list='cps-sensors', kafka_group_name='ch_sensor_consumer', kafka_format='JSONEachRow'"
+              curl -sf "$CH" --data-binary "CREATE MATERIALIZED VIEW IF NOT EXISTS game_analytics.sensor_data_mv TO game_analytics.sensor_data AS SELECT * FROM game_analytics.sensor_data_queue"
               echo "✅ CH init done"
