@@ -108,3 +108,4 @@ with DAG(
     extract = PythonOperator(task_id='extract_from_postgres', python_callable=extract_from_postgres)
     load = PythonOperator(task_id='load_to_clickhouse', python_callable=load_to_clickhouse)
     extract >> load
+print("[DEMO] v2 built at $(date)")
