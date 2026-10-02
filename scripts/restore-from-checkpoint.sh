@@ -88,15 +88,37 @@ fi
 # ─── [4/12] K8s manifests (in order) ───
 log "[4/12] K8s manifests"
 
-# Order: infra → data-platform → cps → airflow → traefik → argocd → monitoring
-for ns in infra data-platform cps airflow traefik argocd monitoring; do
-    manifest="$CHECKPOINT_DIR/k8s/$ns.yaml"
+K8S_DIR="$CHECKPOINT_DIR/k8s"
+
+# 1. Apply cluster-scoped FIRST
+if [ -f "$K8S_DIR/_namespaces.yaml" ]; then
+    kubectl apply --validate=false -f "$K8S_DIR/_namespaces.yaml" 2>&1 | grep -cE "created|configured|unchanged" | xargs -I{} echo "  Namespaces: {} applied"
+fi
+
+if [ -f "$K8S_DIR/_cluster-scoped.yaml" ]; then
+    kubectl apply --validate=false -f "$K8S_DIR/_cluster-scoped.yaml" 2>&1 | grep -cE "created|configured|unchanged" | xargs -I{} echo "  Cluster-scoped: {} applied"
+fi
+
+ok "Cluster-scoped applied"
+
+# 2. Apply namespaced — порядок важен
+for ns_file in infra data-platform cps airflow traefik argocd monitoring; do
+    manifest="$K8S_DIR/$ns_file.yaml"
     if [ -f "$manifest" ] && [ -s "$manifest" ]; then
-        # Remove Secret type — secrets we recreate separately
-        kubectl apply --validate=false -f "$manifest" 2>&1 | \
-            grep -E "created|configured|unchanged" | wc -l | xargs -I{} echo "    $ns: {} resources"
+        count=$(kubectl apply --validate=false -f "$manifest" 2>&1 | grep -cE "created|configured|unchanged" || echo 0)
+        ok "$ns_file.yaml ($count resources)"
     fi
 done
+
+# 3. Apply other namespaces (default, kube-system, etc) — только Deployments/ConfigMaps
+for ns_file in default kube-system kube-public kube-node-lease falco agones-system open-match vault; do
+    manifest="$K8S_DIR/$ns_file.yaml"
+    if [ -f "$manifest" ] && [ -s "$manifest" ]; then
+        count=$(kubectl apply --validate=false -f "$manifest" 2>&1 | grep -cE "created|configured|unchanged" || echo 0)
+        warn "$ns_file.yaml ($count resources) — skipped conflicts"
+    fi
+done
+
 ok "manifests applied"
 
 # Wait for key pods

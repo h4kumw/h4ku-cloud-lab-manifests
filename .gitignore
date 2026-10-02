@@ -1,4 +1,6 @@
 cloud-lab-checkpoint-*.tar.gz
+cloud-lab-checkpoint-*/
 secrets/
-*.bak
+*.bak-*
 __pycache__/
+*.pyc
