@@ -1,31 +1,28 @@
 executor: CeleryExecutor
-
 workers:
   replicas: 1
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
   celery:
     extraVolumes:
-      - name: dags-pvc
-        persistentVolumeClaim:
-          claimName: airflow-dags
+    - name: dags-pvc
+      persistentVolumeClaim:
+        claimName: airflow-dags
     extraVolumeMounts:
-      - name: dags-pvc
-        mountPath: /opt/airflow/dags
-
+    - name: dags-pvc
+      mountPath: /opt/airflow/dags
+  extraEnv: &id001
+  - name: AIRFLOW_CONN_POSTGRES_FARCANA
+    value: postgres://admin:postgres@postgres.infra.svc.cluster.local:5432/farcana
 createUserJob:
   defaultUser:
     username: admin
     password: admin
-
 redis:
   enabled: true
-
 postgresql:
   enabled: true
-
-apiSecretKey: "cloud-lab-static-api-secret-key-2026"
-
+apiSecretKey: cloud-lab-static-api-secret-key-2026
 dags:
   persistence:
     enabled: true
@@ -34,54 +31,53 @@ dags:
     size: 1Gi
   gitSync:
     enabled: false
-
 airflow:
   config:
-    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
   extraEnv:
-    - name: AIRFLOW_CONN_POSTGRES_FARCANA
-      value: "postgres://admin:postgres@postgres.infra.svc.cluster.local:5432/farcana"
-
+  - name: AIRFLOW_CONN_POSTGRES_FARCANA
+    value: postgres://admin:postgres@postgres.infra.svc.cluster.local:5432/farcana
 scheduler:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
   extraVolumes:
-    - name: dags-pvc
-      persistentVolumeClaim:
-        claimName: airflow-dags
+  - name: dags-pvc
+    persistentVolumeClaim:
+      claimName: airflow-dags
   extraVolumeMounts:
-    - name: dags-pvc
-      mountPath: /opt/airflow/dags
-
+  - name: dags-pvc
+    mountPath: /opt/airflow/dags
+  extraEnv: *id001
 dagProcessor:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
   extraVolumes:
-    - name: dags-pvc
-      persistentVolumeClaim:
-        claimName: airflow-dags
+  - name: dags-pvc
+    persistentVolumeClaim:
+      claimName: airflow-dags
   extraVolumeMounts:
-    - name: dags-pvc
-      mountPath: /opt/airflow/dags
-
+  - name: dags-pvc
+    mountPath: /opt/airflow/dags
+  extraEnv: *id001
 apiServer:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
   extraVolumes:
-    - name: dags-pvc
-      persistentVolumeClaim:
-        claimName: airflow-dags
+  - name: dags-pvc
+    persistentVolumeClaim:
+      claimName: airflow-dags
   extraVolumeMounts:
-    - name: dags-pvc
-      mountPath: /opt/airflow/dags
-
+  - name: dags-pvc
+    mountPath: /opt/airflow/dags
+  extraEnv: *id001
 triggerer:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
   extraVolumes:
-    - name: dags-pvc
-      persistentVolumeClaim:
-        claimName: airflow-dags
+  - name: dags-pvc
+    persistentVolumeClaim:
+      claimName: airflow-dags
   extraVolumeMounts:
-    - name: dags-pvc
-      mountPath: /opt/airflow/dags
+  - name: dags-pvc
+    mountPath: /opt/airflow/dags
+  extraEnv: *id001
