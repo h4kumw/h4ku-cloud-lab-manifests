@@ -11,9 +11,9 @@ workers:
     extraVolumeMounts:
     - name: dags-pvc
       mountPath: /opt/airflow/dags
-  extraEnv: &id001
-  - name: AIRFLOW_CONN_POSTGRES_FARCANA
-    value: postgres://admin:postgres@postgres.infra.svc.cluster.local:5432/farcana
+    extraEnv:
+    - name: AIRFLOW_CONN_POSTGRES_FARCANA
+      value: postgres://admin:postgres@postgres.infra.svc.cluster.local:5432/farcana
 createUserJob:
   defaultUser:
     username: admin
@@ -47,7 +47,6 @@ scheduler:
   extraVolumeMounts:
   - name: dags-pvc
     mountPath: /opt/airflow/dags
-  extraEnv: *id001
 dagProcessor:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
@@ -58,7 +57,6 @@ dagProcessor:
   extraVolumeMounts:
   - name: dags-pvc
     mountPath: /opt/airflow/dags
-  extraEnv: *id001
 apiServer:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
@@ -69,7 +67,6 @@ apiServer:
   extraVolumeMounts:
   - name: dags-pvc
     mountPath: /opt/airflow/dags
-  extraEnv: *id001
 triggerer:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
@@ -80,4 +77,6 @@ triggerer:
   extraVolumeMounts:
   - name: dags-pvc
     mountPath: /opt/airflow/dags
-  extraEnv: *id001
+env:
+- name: AIRFLOW_CONN_POSTGRES_FARCANA
+  value: postgres://admin:postgres@postgres.infra.svc.cluster.local:5432/farcana
