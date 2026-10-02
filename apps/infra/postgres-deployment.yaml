@@ -31,7 +31,7 @@ spec:
               value: postgres
             - name: POSTGRES_USER
               value: admin
-          image: pgvector/pgvector:pg15
+          image: pgvector/pgvector:pg15-trixie
           livenessProbe:
             exec:
               command:
