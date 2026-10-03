@@ -11,3 +11,4 @@ COPY *.py /app/
 
 # Entrypoint (по умолчанию — farcana)
 CMD ["python", "farcana_director.py"]
+# CI test Sat Oct  3 12:33:46 +03 2026
