@@ -12,10 +12,20 @@ spec:
     targetRevision: main
     path: apps/infra
     directory:
-      recurse: true    # ← ВАЖНО: рекурсивно обходить подпапки
+      recurse: true
   destination:
     server: https://kubernetes.default.svc
     namespace: infra
+  ignoreDifferences:
+    # PVC immutable после создания — ArgoCD не должен пытаться их менять
+    - kind: PersistentVolumeClaim
+      jsonPointers:
+        - /spec
+    # Job immutable после запуска — pg-init-schema, ch-init-schema
+    - kind: Job
+      jsonPointers:
+        - /spec/template
+        - /status
   syncPolicy:
     automated:
       prune: false
@@ -23,3 +33,4 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - RespectIgnoreDifferences=true
