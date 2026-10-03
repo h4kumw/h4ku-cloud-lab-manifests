@@ -52,7 +52,21 @@ class CPSSensorSimulator:
             self.kafka_producer = None
 
     def generate_sensor_data(self):
-        devices = ["sensor_01", "sensor_02", "sensor_03", "edge_01", "edge_02"]
+        devices = [
+    # US
+    "sensor_01", "sensor_02", "sensor_03", "sensor_04", "edge_01",
+    # Europe
+    "sensor_05", "sensor_06", "sensor_07", "sensor_08", "sensor_09", "edge_02",
+    # Asia
+    "sensor_10", "sensor_11", "sensor_12", "sensor_13", "sensor_14",
+    "sensor_15", "sensor_16", "sensor_17",
+    # Australia
+    "sensor_18", "sensor_19",
+    # South America
+    "sensor_20", "sensor_21", "sensor_22",
+    # Africa
+    "sensor_23", "sensor_24", "sensor_25",
+]
         sensors = ["temperature", "pressure", "vibration", "humidity", "current"]
 
         device = random.choice(devices)
