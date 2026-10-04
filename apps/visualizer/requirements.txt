@@ -1,0 +1,4 @@
+flask
+flask-socketio
+requests
+psycopg2-binary

@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: visualizer
+  namespace: data-platform
+  labels:
+    app: visualizer
+    case: web3
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: visualizer
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: visualizer
+        case: web3
+    spec:
+      containers:
+      - name: visualizer
+        image: ghcr.io/h4kumw/cloud-lab-visualizer:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 5000
+          protocol: TCP
+        env:
+        - name: PG_HOST
+          value: postgres.infra.svc.cluster.local
+        - name: PG_PORT
+          value: '5432'
+        - name: PG_USER
+          value: admin
+        - name: PG_PASSWORD
+          value: postgres
+        - name: PG_DB
+          value: farcana
+        - name: CH_HOST
+          value: clickhouse.infra.svc.cluster.local
+        - name: CH_PORT
+          value: '8123'
+        - name: CH_USER
+          value: admin
+        - name: CH_PASSWORD
+          value: admin
+        resources:
+          requests:
+            memory: 128Mi
+            cpu: 100m
+          limits:
+            memory: 512Mi
+            cpu: 500m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: visualizer
+  namespace: data-platform
+  labels:
+    app: visualizer
+spec:
+  type: ClusterIP
+  selector:
+    app: visualizer
+  ports:
+  - name: http
+    port: 5000
+    targetPort: 5000
+    protocol: TCP
