@@ -23,6 +23,8 @@ spec:
         app: visualizer
         case: web3
     spec:
+      imagePullSecrets:
+      - name: ghcr-secret
       containers:
       - name: visualizer
         image: ghcr.io/h4kumw/cloud-lab-visualizer:latest
