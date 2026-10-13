@@ -24,7 +24,7 @@ spec:
         io.kompose.service: mosquitto
     spec:
       containers:
-        - image: eclipse-mosquitto:latest
+        - image: eclipse-mosquitto:2.0.18
           livenessProbe:
             exec:
               command:
