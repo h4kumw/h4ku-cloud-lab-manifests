@@ -4,3 +4,6 @@ secrets/
 *.bak-*
 __pycache__/
 *.pyc
+*.bak
+*.bak.*
+*.bak-*
