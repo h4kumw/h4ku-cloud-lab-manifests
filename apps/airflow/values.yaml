@@ -4,10 +4,6 @@ workers:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
   celery:
-    extraVolumes:
-    - name: dags-pvc
-      persistentVolumeClaim:
-        claimName: airflow-dags
     extraVolumeMounts:
     - name: dags-pvc
       mountPath: /opt/airflow/dags
@@ -40,40 +36,24 @@ airflow:
 scheduler:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
-  extraVolumes:
-  - name: dags-pvc
-    persistentVolumeClaim:
-      claimName: airflow-dags
   extraVolumeMounts:
   - name: dags-pvc
     mountPath: /opt/airflow/dags
 dagProcessor:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
-  extraVolumes:
-  - name: dags-pvc
-    persistentVolumeClaim:
-      claimName: airflow-dags
   extraVolumeMounts:
   - name: dags-pvc
     mountPath: /opt/airflow/dags
 apiServer:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
-  extraVolumes:
-  - name: dags-pvc
-    persistentVolumeClaim:
-      claimName: airflow-dags
   extraVolumeMounts:
   - name: dags-pvc
     mountPath: /opt/airflow/dags
 triggerer:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
-  extraVolumes:
-  - name: dags-pvc
-    persistentVolumeClaim:
-      claimName: airflow-dags
   extraVolumeMounts:
   - name: dags-pvc
     mountPath: /opt/airflow/dags
