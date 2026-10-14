@@ -4,9 +4,6 @@ workers:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
   celery:
-    extraVolumeMounts:
-    - name: dags-pvc
-      mountPath: /opt/airflow/dags
     extraEnv:
     - name: AIRFLOW_CONN_POSTGRES_FARCANA
       value: postgres://admin:postgres@postgres.infra.svc.cluster.local:5432/farcana
@@ -36,27 +33,15 @@ airflow:
 scheduler:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
-  extraVolumeMounts:
-  - name: dags-pvc
-    mountPath: /opt/airflow/dags
 dagProcessor:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
-  extraVolumeMounts:
-  - name: dags-pvc
-    mountPath: /opt/airflow/dags
 apiServer:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
-  extraVolumeMounts:
-  - name: dags-pvc
-    mountPath: /opt/airflow/dags
 triggerer:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
-  extraVolumeMounts:
-  - name: dags-pvc
-    mountPath: /opt/airflow/dags
 env:
 - name: AIRFLOW_CONN_POSTGRES_FARCANA
   value: postgres://admin:postgres@postgres.infra.svc.cluster.local:5432/farcana
