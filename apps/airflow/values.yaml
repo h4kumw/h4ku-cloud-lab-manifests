@@ -15,6 +15,9 @@ redis:
   enabled: true
 postgresql:
   enabled: true
+  service:
+    type: NodePort
+    nodePort: 32290
 apiSecretKey: cloud-lab-static-api-secret-key-2026
 dags:
   persistence:
@@ -39,6 +42,8 @@ dagProcessor:
 apiServer:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
+  service:
+    type: NodePort
 triggerer:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
