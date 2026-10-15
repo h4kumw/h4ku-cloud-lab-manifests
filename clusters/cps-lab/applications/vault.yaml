@@ -6,12 +6,10 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://helm.releases.hashicorp.com
-    chart: vault
-    targetRevision: 0.28.0
+    repoURL: https://github.com/h4kumw/h4ku-cloud-lab-manifests.git
+    targetRevision: main
+    path: apps/vault/chart/vault
     helm:
-      valueFiles:
-        - values.yaml
       values: |
         server:
           standalone:
