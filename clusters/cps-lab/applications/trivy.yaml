@@ -10,12 +10,27 @@ spec:
     chart: trivy-operator
     targetRevision: 0.24.1
     helm:
-      valueFiles:
-        - $values/apps/trivy/values.yaml
-  sources:
-    - repoURL: https://github.com/h4kumw/h4ku-cloud-lab-manifests.git
-      targetRevision: main
-      ref: values
+      values: |
+        trivy:
+          ignoreUnfixed: true
+          severity: "CRITICAL,HIGH"
+          timeout: 5m
+        operator:
+          scanJobTimeout: 5m
+          vulnerabilityScannerEnabled: true
+          configAuditScannerEnabled: true
+          rbacAssessmentScannerEnabled: true
+          infraAssessmentScannerEnabled: true
+          exposedSecretScannerEnabled: false
+        serviceMonitor:
+          enabled: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
   destination:
     server: https://kubernetes.default.svc
     namespace: trivy-system
