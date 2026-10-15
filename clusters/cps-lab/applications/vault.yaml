@@ -6,12 +6,36 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/h4kumw/h4ku-cloud-lab-manifests.git
-    targetRevision: main
-    path: apps/vault
+    repoURL: https://helm.releases.hashicorp.com
+    chart: vault
+    targetRevision: 0.28.0
     helm:
       valueFiles:
         - values.yaml
+      values: |
+        server:
+          standalone:
+            enabled: true
+            config: |
+              ui = true
+              listener "tcp" {
+                tls_disable = 1
+                address = "[::]:8200"
+                cluster_address = "[::1]:8201"
+              }
+              storage "file" {
+                path = "/vault/data"
+              }
+          dataStorage:
+            enabled: true
+            size: 1Gi
+            storageClass: local-path
+          service:
+            type: NodePort
+        ui:
+          enabled: true
+        injector:
+          enabled: true
   destination:
     server: https://kubernetes.default.svc
     namespace: vault
