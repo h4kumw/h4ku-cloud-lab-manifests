@@ -1,0 +1,5 @@
+# kube-prometheus-stack Helm values
+prometheus:
+  service:
+    type: NodePort
+    nodePort: 30167

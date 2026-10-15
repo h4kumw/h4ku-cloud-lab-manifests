@@ -1,0 +1,35 @@
+# Lightweight kube-prometheus-stack для K3d
+prometheus:
+  prometheusSpec:
+    replicas: 1
+    resources:
+      requests: {cpu: 100m, memory: 256Mi}
+      limits:   {cpu: 500m, memory: 1Gi}
+    retention: 7d
+    nodeSelector:
+      kubernetes.io/hostname: k3d-cps-lab-agent-0
+  nodeSelector:
+    kubernetes.io/hostname: k3d-cps-lab-agent-0
+
+grafana:
+  enabled: false    # У нас уже есть Grafana external
+
+alertmanager:
+  enabled: false    # У нас уже есть Alertmanager
+
+kubeStateMetrics:
+  enabled: true
+
+nodeExporter:
+  enabled: true
+
+prometheusOperator:
+  resources:
+    requests: {cpu: 50m, memory: 128Mi}
+    limits:   {cpu: 200m, memory: 256Mi}
+
+# NodePort для socat federation
+prometheus:
+  service:
+    type: NodePort
+    nodePort: 30167
