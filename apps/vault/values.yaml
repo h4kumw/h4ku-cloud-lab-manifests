@@ -1,0 +1,29 @@
+# Vault Helm chart values — standalone (для портфолио)
+server:
+  standalone:
+    enabled: true
+    config: |
+      ui = true
+      listener "tcp" {
+        tls_disable = 1
+        address = "[::]:8200"
+        cluster_address = "[::1]:8201"
+      }
+      storage "file" {
+        path = "/vault/data"
+      }
+  dataStorage:
+    enabled: true
+    size: 1Gi
+    storageClass: local-path
+  service:
+    type: NodePort
+    nodePort: 30200
+
+ui:
+  enabled: true
+  serviceType: NodePort
+  serviceNodePort: 30201
+
+injector:
+  enabled: true
