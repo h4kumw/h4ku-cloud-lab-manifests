@@ -1,0 +1,50 @@
+# SonarQube Helm values
+# Standalone mode (без HA) + встроенный PostgreSQL (deprecated в новых версиях)
+# Для портфолио — standalone OK
+
+edition: "community"
+
+# Внутренний postgres (для community edition)
+postgresql:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: local-path
+  resources:
+    requests: {cpu: 100m, memory: 256Mi}
+    limits:   {cpu: 500m, memory: 512Mi}
+
+# SonarQube main
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClass: local-path
+
+service:
+  type: NodePort
+  externalPort: 9000
+  internalPort: 9000
+  nodePort: 30090
+
+# Ресурсы (SonarQube тяжёлый — ES + Java)
+resources:
+  requests: {cpu: 300m, memory: 1Gi}
+  limits:   {cpu: 1500m, memory: 3Gi}
+
+# Отключить встроенный ingress (используем Traefik IngressRoute)
+ingress:
+  enabled: false
+
+# Мониторинг
+metrics:
+  serviceMonitor:
+    enabled: true
+
+# Prometheus exporter
+prometheusExporter:
+  enabled: true
+  config:
+    web:
+      exposure:
+        include: "search,ce,tasks,plugins"
