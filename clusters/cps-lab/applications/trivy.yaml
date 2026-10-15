@@ -17,7 +17,8 @@ spec:
           timeout: 5m
         operator:
           scanJobTimeout: 5m
-          vulnerabilityScannerEnabled: true
+          # ВАЖНО: отключаем vulnerability scanner из-за несовместимости с k8s 1.35
+          vulnerabilityScannerEnabled: false
           configAuditScannerEnabled: true
           rbacAssessmentScannerEnabled: true
           infraAssessmentScannerEnabled: true
