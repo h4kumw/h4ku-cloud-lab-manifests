@@ -1,4 +1,10 @@
+# D2: собственный образ Airflow с ML-пакетами (xgboost, mlflow, clickhouse)
+defaultAirflowRepository: ghcr.io/h4kumw/cloud-lab-airflow
+defaultAirflowTag: "3.2.2-latest"
+airflowVersion: "3.2.2"
+
 executor: CeleryExecutor
+
 workers:
   replicas: 1
   nodeSelector:
@@ -7,18 +13,23 @@ workers:
     extraEnv:
     - name: AIRFLOW_CONN_POSTGRES_FARCANA
       value: postgres://admin:postgres@postgres.infra.svc.cluster.local:5432/farcana
+
 createUserJob:
   defaultUser:
     username: admin
     password: admin
+
 redis:
   enabled: true
+
 postgresql:
   enabled: true
   service:
     type: NodePort
     nodePort: 32290
+
 apiSecretKey: cloud-lab-static-api-secret-key-2026
+
 dags:
   persistence:
     enabled: true
@@ -27,26 +38,40 @@ dags:
     size: 1Gi
   gitSync:
     enabled: false
+
 airflow:
   config:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
   extraEnv:
   - name: AIRFLOW_CONN_POSTGRES_FARCANA
     value: postgres://admin:postgres@postgres.infra.svc.cluster.local:5432/farcana
+  - name: AIRFLOW_CONN_CLICKHOUSE_DEFAULT
+    value: clickhouse://default:@clickhouse.infra.svc.cluster.local:8123/game_analytics
+  - name: MLFLOW_TRACKING_URI
+    value: http://mlflow.mlflow.svc.cluster.local:5000
+
 scheduler:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
+
 dagProcessor:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
+
 apiServer:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
   service:
     type: NodePort
+
 triggerer:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
+
 env:
 - name: AIRFLOW_CONN_POSTGRES_FARCANA
   value: postgres://admin:postgres@postgres.infra.svc.cluster.local:5432/farcana
+- name: AIRFLOW_CONN_CLICKHOUSE_DEFAULT
+  value: clickhouse://default:@clickhouse.infra.svc.cluster.local:8123/game_analytics
+- name: MLFLOW_TRACKING_URI
+  value: http://mlflow.mlflow.svc.cluster.local:5000
