@@ -9,18 +9,6 @@ workers:
   replicas: 1
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
-  celery:
-    extraEnv:
-    - name: AIRFLOW_CONN_POSTGRES_FARCANA
-      value: postgres://admin:postgres@postgres.infra.svc.cluster.local:5432/farcana
-    - name: MLFLOW_S3_ENDPOINT_URL
-      value: http://minio.infra.svc.cluster.local:9000
-    - name: AWS_ACCESS_KEY_ID
-      value: minioadmin
-    - name: AWS_SECRET_ACCESS_KEY
-      value: minioadmin
-    - name: AWS_DEFAULT_REGION
-      value: us-east-1
 createUserJob:
   defaultUser:
     username: admin
@@ -51,6 +39,14 @@ airflow:
     value: clickhouse://admin:admin@clickhouse.infra.svc.cluster.local:8123/game_analytics
   - name: MLFLOW_TRACKING_URI
     value: http://mlflow.mlflow.svc.cluster.local:5000
+  - name: MLFLOW_S3_ENDPOINT_URL
+    value: http://minio.infra.svc.cluster.local:9000
+  - name: AWS_ACCESS_KEY_ID
+    value: minioadmin
+  - name: AWS_SECRET_ACCESS_KEY
+    value: minioadmin
+  - name: AWS_DEFAULT_REGION
+    value: us-east-1
 scheduler:
   nodeSelector:
     kubernetes.io/hostname: k3d-cps-lab-agent-0
@@ -72,3 +68,11 @@ env:
   value: clickhouse://admin:admin@clickhouse.infra.svc.cluster.local:8123/game_analytics
 - name: MLFLOW_TRACKING_URI
   value: http://mlflow.mlflow.svc.cluster.local:5000
+- name: MLFLOW_S3_ENDPOINT_URL
+  value: http://minio.infra.svc.cluster.local:9000
+- name: AWS_ACCESS_KEY_ID
+  value: minioadmin
+- name: AWS_SECRET_ACCESS_KEY
+  value: minioadmin
+- name: AWS_DEFAULT_REGION
+  value: us-east-1
