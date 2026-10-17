@@ -28,7 +28,8 @@ spec:
             --backend-store-uri postgresql://admin:postgres@postgres.infra.svc.cluster.local:5432/mlflow \
             --default-artifact-root s3://mlflow/ \
             --serve-artifacts \
-            --artifacts-destination s3://mlflow/
+            --artifacts-destination s3://mlflow/ \
+            --allowed-hosts "mlflow.mlflow.svc.cluster.local,mlflow.mlflow.svc.cluster.local:5000,localhost,localhost:5000,mlflow,mlflow:5000"
         env:
         - name: MLFLOW_S3_ENDPOINT_URL
           value: http://minio.infra.svc.cluster.local:9000
