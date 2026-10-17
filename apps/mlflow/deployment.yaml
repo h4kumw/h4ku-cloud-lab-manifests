@@ -15,13 +15,13 @@ spec:
     spec:
       containers:
       - name: mlflow
-        image: ghcr.io/mlflow/mlflow:v3.17.1   # ← MLflow 3.x!
+        image: ghcr.io/mlflow/mlflow:v3.17.1
         command:
         - /bin/bash
         - -c
         args:
         - |
-          pip install --no-cache-dir psycopg2-binary boto3 sqlalchemy &&
+          pip install --no-cache-dir psycopg2-binary "psycopg[binary]" boto3 sqlalchemy &&
           mlflow server \
             --host 0.0.0.0 \
             --port 5000 \
