@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ml-serving
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/h4kumw/h4ku-cloud-lab-manifests.git
+    targetRevision: main
+    path: apps/ml-serving
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mlflow
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true

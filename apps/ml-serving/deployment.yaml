@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-serving
+  namespace: mlflow
+  labels:
+    app: ml-serving
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ml-serving
+  template:
+    metadata:
+      labels:
+        app: ml-serving
+    spec:
+      initContainers:
+      - name: wait-for-mlflow
+        image: curlimages/curl:8.10.1
+        command:
+        - sh
+        - -c
+        - |
+          until curl -sf http://mlflow.mlflow.svc.cluster.local:5000/health; do
+            echo "Waiting for MLflow..."
+            sleep 2
+          done
+          echo "MLflow is ready"
+      containers:
+      - name: api
+        image: ghcr.io/h4kumw/cloud-lab-ml-serving:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: MLFLOW_TRACKING_URI
+          value: http://mlflow.mlflow.svc.cluster.local:5000
+        - name: MLFLOW_S3_ENDPOINT_URL
+          value: http://minio.infra.svc.cluster.local:9000
+        - name: AWS_ACCESS_KEY_ID
+          value: minioadmin
+        - name: AWS_SECRET_ACCESS_KEY
+          value: minioadmin
+        - name: AWS_DEFAULT_REGION
+          value: us-east-1
+        - name: MODEL_NAME
+          value: sensor_anomaly_predictor
+        - name: MODEL_STAGE
+          value: latest
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 30

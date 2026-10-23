@@ -1,0 +1,14 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ml-serving
+  namespace: mlflow
+spec:
+  entryPoints:
+  - web
+  routes:
+  - match: Host(`ml-serving.cloud-lab.local`)
+    kind: Rule
+    services:
+    - name: ml-serving
+      port: 8000
