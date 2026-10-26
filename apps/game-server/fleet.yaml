@@ -1,0 +1,28 @@
+apiVersion: agones.dev/v1
+kind: Fleet
+metadata:
+  name: cloud-lab-game-fleet
+  namespace: default
+spec:
+  replicas: 2
+  template:
+    spec:
+      health:
+        disabled: true
+      ports:
+      - name: default
+        portPolicy: Dynamic
+        containerPort: 7654
+      template:
+        spec:
+          containers:
+          - name: game-server
+            image: ghcr.io/h4kumw/cloud-lab-game-server:latest
+            imagePullPolicy: Always
+            resources:
+              requests:
+                memory: "64Mi"
+                cpu: "50m"
+              limits:
+                memory: "128Mi"
+                cpu: "200m"
