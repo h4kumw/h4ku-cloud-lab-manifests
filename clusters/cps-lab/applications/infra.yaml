@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/h4kumw/h4ku-cloud-lab-manifests.git
-    targetRevision: main
+    targetRevision: rocky-migration
     path: apps/infra
     directory:
       recurse: true

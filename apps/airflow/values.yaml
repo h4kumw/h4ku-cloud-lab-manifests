@@ -8,7 +8,7 @@ executor: CeleryExecutor
 workers:
   replicas: 1
   nodeSelector:
-    kubernetes.io/hostname: k3d-cps-lab-agent-0
+    kubernetes.io/hostname: prox1m1ty
 createUserJob:
   defaultUser:
     username: admin
@@ -49,18 +49,18 @@ airflow:
     value: us-east-1
 scheduler:
   nodeSelector:
-    kubernetes.io/hostname: k3d-cps-lab-agent-0
+    kubernetes.io/hostname: prox1m1ty
 dagProcessor:
   nodeSelector:
-    kubernetes.io/hostname: k3d-cps-lab-agent-0
+    kubernetes.io/hostname: prox1m1ty
 apiServer:
   nodeSelector:
-    kubernetes.io/hostname: k3d-cps-lab-agent-0
+    kubernetes.io/hostname: prox1m1ty
   service:
     type: NodePort
 triggerer:
   nodeSelector:
-    kubernetes.io/hostname: k3d-cps-lab-agent-0
+    kubernetes.io/hostname: prox1m1ty
 env:
 - name: AIRFLOW_CONN_POSTGRES_FARCANA
   value: postgres://admin:postgres@postgres.infra.svc.cluster.local:5432/farcana
