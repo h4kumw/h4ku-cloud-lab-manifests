@@ -34,7 +34,7 @@ spec:
               value: minioadmin
             - name: MINIO_ROOT_USER
               value: minioadmin
-          image: quay.io/minio/minio:RELEASE.2024-01-16T16-07-38Z
+          image: cgr.dev/chainguard/minio:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:
