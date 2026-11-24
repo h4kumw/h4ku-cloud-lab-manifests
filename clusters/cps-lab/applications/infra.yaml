@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/h4kumw/h4ku-cloud-lab-manifests.git
+    repoURL: git@github.com:h4kumw/h4ku-cloud-lab-manifests.git
     targetRevision: rocky-migration
     path: apps/infra
     directory:
@@ -32,5 +32,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
       - RespectIgnoreDifferences=true
